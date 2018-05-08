@@ -43,8 +43,6 @@ router.post('/signup', (req, res, next) => {
 
 router.post('/login', (req, res, next) => {
 
-    console.log('router.post(/login');
-
     User.findOne({email: req.body.email}, (err, user) => {
 
         if(err) throw err;
