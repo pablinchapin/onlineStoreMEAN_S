@@ -1,11 +1,11 @@
 const router = require('express').Router();
 const async = require('async');
-
 const stripe = require('stripe')('sk_test_4iqbPyx1nuSodCSfqZmDNmgg');
 
 const Category = require('../models/category');
 const Product = require('../models/product');
 const Review = require('../models/review');
+const Order = require('../models/order');
 
 const checkJWT = require('../middlewares/check-jwt');
 
@@ -118,16 +118,6 @@ router.get('/product/:id', (req, res, next) => {
     .populate('category')
     .populate('owner')
     .deepPopulate('reviews.owner')
-    /*
-    .populate({
-        path : 'reviews',
-        //populate : {path : 'reviews'}
-    })
-    */
-    //.populate('reviews.owner')
-    //.populate( {reviews : 'owner', populate: {reviews : 'owner'}})
-    //.populate( {reviews : owner})
-    //.deepPopulate('reviews.owner')
     .exec((err, product) => {
         if(err){
             res.json({
@@ -172,6 +162,45 @@ router.post('/review', checkJWT, (req, res, next) => {
             });
         }
     ]);
+});
+
+router.post('/payment', checkJWT, (req, res, next) => {
+    const stripeToken = req.body.stripeToken;
+    const currentCharges = Math.round(req.body.totalPrice * 100);
+
+    stripe.customers
+        .create({
+            source: stripeToken.id
+        })
+        .then(function(customer){
+            return stripe.charges.create({
+                amount : currentCharges,
+                currency : 'usd',
+                customer : customer.id
+            });
+        })
+        .then(function(charge){
+            const products = req.body.products;
+
+            let order = new Order();
+            order.owner = req.decoded.user._id;
+            order.totalPrice = currentCharges;
+
+            product.map(product => {
+                order.products.push(
+                    {
+                        product : product.product,
+                        quantity : product.quantity
+                    }
+                );
+            });
+
+            order.save();
+            res.json({
+                success : true,
+                message : "Successfully made a payment"
+            });
+        });
 });
 
 
