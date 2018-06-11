@@ -141,4 +141,46 @@ router.route('/address')
         });
     });
 
+
+    router.get('/orders', checkJWT, (req, res, next) => {
+        Order.find({ owner : req.decoded.user._id })
+            .populate('products.product')
+            .populate('owner')
+            .exec((err, orders) => {
+                if(err){
+                    res.json({
+                        success: false,
+                        message: "Couldn't find your orders"
+                    });
+                }else{
+                    res.json({
+                        success: true,
+                        message: 'Found your orders',
+                        order: order
+                    });
+                }
+            });
+    });
+
+    router.get('/orders/:id', checkJWT, (req, res, next) => {
+        Order.findOne({ _id : req.params.id })
+        .deepPopulate('products.product.owner')
+        .populate('owner')
+        .exec((err, order) => {
+            if(err){
+                res.json({
+                    success: false,
+                    message: "Couldn't find your order"
+                });
+            }else{
+                res.json({
+                    success: true,
+                    message: 'Found your order',
+                    order: order
+                });
+            }
+        });
+    });
+
+
 module.exports = router;
