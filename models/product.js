@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
 const deepPopulate = require('mongoose-deep-populate')(mongoose);
-const mongooseAlgolia = require('mongoose-algolia');
+//const mongooseAlgolia = require('mongoose-algolia');
 
 const ProductSchema = new Schema({
     
@@ -39,6 +39,7 @@ ProductSchema
 
 ProductSchema.plugin(deepPopulate);
 
+/*
 ProductSchema.plugin(mongooseAlgolia, {
     appId: 'S3MZNSBUBH',
     apiKey: '1373e61f4532b1562c1b07be3b0e6f22',
@@ -73,11 +74,12 @@ ProductSchema.plugin(mongooseAlgolia, {
     },
     debug: true
 });
-
+*/
 let Model = mongoose.model('Product', ProductSchema);
+/*
 Model.SyncToAlgolia();
 Model.SetAlgoliaSettings({
     searchableAttributes: ['title']
 });
-
+*/
 module.exports = Model;// mongoose.model('Product', ProductSchema);
